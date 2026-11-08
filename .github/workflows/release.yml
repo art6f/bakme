@@ -56,7 +56,7 @@ jobs:
       
       - name: Generate checksum
         run: |
-          sha256sum --quiet bakme > bakme.checksum
+          sha256sum --quiet bakme | awk '{print $1}' > bakme.checksum
           cat bakme.checksum
 
       - name: Pack archive
