@@ -113,7 +113,7 @@ jobs:
           targets: aarch64-unknown-linux-musl
 
       - name: Add a targed
-        run: rustup target add aarch64-unknown-linux-mus
+        run: rustup target add aarch64-unknown-linux-musl
 
       - name: Set version
         run: echo "VERSION=${GITHUB_REF_NAME#release/}" >> "$GITHUB_ENV"
