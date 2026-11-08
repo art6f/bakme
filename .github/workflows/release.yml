@@ -22,23 +22,26 @@ jobs:
       - name: Build release
         run: cargo build --release --target aarch64-apple-darwin
 
+      - name: Copy binary checksum
+        run: cp target/aarch64-apple-darwin/release/bakme bakme
+
       - name: Generate checksum
         run: |
-          shasum -a 256 target/aarch64-apple-darwin/release/bakme | awk '{print $1}' > bakme.checksum
+          shasum -a 256 -b bakme > bakme.checksum
           cat bakme.checksum
 
       - name: Pack archive
-        run: zip bakme.zip bakme bakme.checksum
+        run: zip bakme-aarch64-apple-darwin.zip bakme bakme.checksum
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.ref_name }}
           name: ${{ github.ref_name }}
+          tag_name: ${{ github.ref_name }}
           draft: false
           prerelease: false
-          files: bakme-macos-arm.zip
-          body: ""
+          files: bakme-aarch64-apple-darwin.zip
+          body: "To be provided..."
 
   build-linux-musl:
     runs-on: ubuntu-latest
