@@ -38,16 +38,15 @@ fn create_copy(path: &String, base_ext: &str, timed: bool) {
 
     let mut extenstion: String;
 
-    let canonical_ext: String;
-    if timed {
-        canonical_ext = base_ext.to_string()
+    let canonical_ext: String = if timed {
+        base_ext.to_string()
             + chrono::Local::now()
                 .format("_%Y%m%d_%H%M%S")
                 .to_string()
-                .as_str();
+                .as_str()
     } else {
-        canonical_ext = base_ext.to_string();
-    }
+        base_ext.to_string()
+    };
 
     let mut new_path = format!("{path}.{canonical_ext}");
     while std::path::Path::new(&new_path)
