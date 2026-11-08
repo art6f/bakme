@@ -46,7 +46,7 @@ jobs:
           files: bakme_${{ env.VERSION }}-aarch64-apple-darwin.zip
           body: "To be provided..."
 
-  build-linux:
+  build-linux-amd64:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
