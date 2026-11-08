@@ -8,34 +8,34 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  build-macos-arm:
-    runs-on: macos-13
-    steps:
-      - uses: actions/checkout@v7
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: aarch64-apple-darwin
-
-      - name: Build release
-        run: cargo build --release --target aarch64-apple-darwin
-
-      - name: Generate checksum
-        run: |
-          shasum -a 256 target/aarch64-apple-darwin/release/bakme | awk '{print $1}' > bakme.checksum
-          cat bakme.checksum
-
-      - name: Pack archive
-        run: zip bakme.zip bakme bakme.checksum
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ github.ref_name }}
-          name: ${{ github.ref_name }}
-          draft: false
-          prerelease: false
-          files: bakme-macos-arm.zip
-          body: ""
+#  build-macos-arm:
+#    runs-on: macos-13
+#    steps:
+#      - uses: actions/checkout@v7
+#      - uses: dtolnay/rust-toolchain@stable
+#        with:
+#          targets: aarch64-apple-darwin
+#
+#      - name: Build release
+#        run: cargo build --release --target aarch64-apple-darwin
+#
+#      - name: Generate checksum
+#        run: |
+#          shasum -a 256 target/aarch64-apple-darwin/release/bakme | awk '{print $1}' > bakme.checksum
+#          cat bakme.checksum
+#
+#      - name: Pack archive
+#        run: zip bakme.zip bakme bakme.checksum
+#
+#      - name: Create GitHub Release
+#        uses: softprops/action-gh-release@v2
+#        with:
+#          tag_name: ${{ github.ref_name }}
+#          name: ${{ github.ref_name }}
+#          draft: false
+#          prerelease: false
+#          files: bakme-macos-arm.zip
+#          body: ""
 
   build-linux-musl:
     runs-on: ubuntu-latest
@@ -51,9 +51,12 @@ jobs:
       - name: Build release
         run: cargo build --release --target x86_64-unknown-linux-musl
 
+      - name: Copy binary checksum
+        run: cp target/x86_64-unknown-linux-musl/release/bakme bakme
+      
       - name: Generate checksum
         run: |
-          sha256sum target/x86_64-unknown-linux-musl/release/bakme | awk '{print $1}' > bakme.checksum
+          sha256sum --quiet bakme > bakme.checksum
           cat bakme.checksum
 
       - name: Pack archive
