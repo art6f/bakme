@@ -9,7 +9,7 @@ use clap::Parser;
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
 struct Args {
-    /// Extension to appent to the file (default: bak)
+    /// Extension to append to the file (default: bak)
     #[arg(short, long)]
     extension: Option<String>,
 
@@ -62,7 +62,7 @@ fn create_copy(path: &str, base_ext: &str, timed: bool, force: bool) {
     verbose_print(format!("Targed path found '{path}'"));
 
     let mut counter: u32 = 0;
-    let mut extenstion: String;
+    let mut extension: String;
 
     let canonical_ext: String = if timed {
         base_ext.to_string()
@@ -82,8 +82,8 @@ fn create_copy(path: &str, base_ext: &str, timed: bool, force: bool) {
         verbose_print(format!("Backup name already exists '{new_path}'"));
 
         counter += 1;
-        extenstion = format!("{canonical_ext}-{counter}");
-        new_path = format!("{path}.{extenstion}");
+        extension = format!("{canonical_ext}-{counter}");
+        new_path = format!("{path}.{extension}");
 
         if !force && counter >= BAK_LIMITS {
             println!(
@@ -98,7 +98,7 @@ fn create_copy(path: &str, base_ext: &str, timed: bool, force: bool) {
         println!("Backing file '{path}' to '{new_path}'");
 
         if fs::copy(path, new_path).is_err() {
-            println!("Error backing-up tile '{path}'");
+            println!("Error backing-up file '{path}'");
         }
     } else {
         println!("Backing a folder {path} to '{new_path}'");
