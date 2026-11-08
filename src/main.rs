@@ -76,7 +76,9 @@ fn create_copy(path: &String, base_ext: &str, timed: bool, force: bool) {
         new_path = format!("{path}.{extenstion}");
 
         if !force && counter >= BAK_LIMITS {
-            println!("You have at least {BAK_LIMITS} copies of '{path}.{canonical_ext}', refusing to continue");
+            println!(
+                "You have at least {BAK_LIMITS} copies of '{path}.{canonical_ext}', refusing to continue"
+            );
             println!("Use --force parameter if you want to ignore it");
             return;
         }
@@ -89,8 +91,12 @@ fn create_copy(path: &String, base_ext: &str, timed: bool, force: bool) {
             println!("Error backing-up tile '{path}'");
         }
     } else {
-        println!("Sorry, folder are not yet supported...")
+        copy_dir(path, new_path);
     }
+}
+
+fn copy_dir(_path: &String, _new_path: String) {
+    println!("Sorry, folder are not yet supported...")
 }
 
 fn verbose_print(msg: String) {
