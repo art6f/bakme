@@ -46,8 +46,7 @@ fn test_copy_single_file() {
             std::fs::read(dest).unwrap_or_default(),
             "Original and backup content differs"
         );
-    }
-    else {
+    } else {
         panic!("Copy function returned an error")
     }
 }
@@ -72,8 +71,9 @@ fn test_copy_directory_with_files() {
             std::fs::read(dest).unwrap_or_default(),
             "Original and backup content differs"
         );
-    }
-    else {
+    } else {
         panic!("Copy function returned an error")
     }
-    }
+
+    // TODO: add an actual folder/files comparison
+}
