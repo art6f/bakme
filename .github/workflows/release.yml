@@ -6,7 +6,7 @@ on:
 
 permissions:
   contents: write
-  
+
 env:
   CARGO_TERM_COLOR: always
 
@@ -63,7 +63,7 @@ jobs:
           cat bakme.checksum
 
       - name: Pack archive
-        run: zip bakme.zip bakme bakme.checksum
+        run: zip bakme-linux-x86_64-musl.zip bakme bakme.checksum
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
