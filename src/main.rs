@@ -1,4 +1,3 @@
-use core::str;
 use std::{
     fs,
     sync::atomic::{AtomicBool, Ordering},
