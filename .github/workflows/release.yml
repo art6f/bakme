@@ -1,0 +1,15 @@
+name: Release
+
+on:
+  push:
+    tags: ["release/**"]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build-linux-musl:
+    runs-on: ubuntu-latest
+
+  macps:
+    runs-on: macos-13
