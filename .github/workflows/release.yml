@@ -56,7 +56,7 @@ jobs:
       
       - name: Generate checksum
         run: |
-          sha256sum --quiet bakme | awk '{print $1}' > bakme.checksum
+          shasum -a 256 -b bakme > bakme.checksum
           cat bakme.checksum
 
       - name: Pack archive
@@ -65,9 +65,9 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.ref_name }}
           name: ${{ github.ref_name }}
+          tag_name: ${{ github.ref_name }}
           draft: false
           prerelease: false
           files: bakme-linux-x86_64-musl.zip
-          body: ""
+          body: "To be provided..."
