@@ -67,16 +67,29 @@ jobs:
         run: zip bakme-linux-x86_64-musl.zip bakme bakme.checksum
 
       - name: Create .deb package
+        env:
+          VERSION: ${{ github.ref_name }}
         run: |
-          mkdir -p deb-root/usr/local/bin deb-root/usr/local/share/doc/bakme
-          cp bakme deb-root/usr/local/bin/bakme
-          cp bakme.checksum deb-root/usr/local/share/doc/bakme/checksum
-          echo "2.0" > debian-binary
-          printf "Package: bakme\nVersion: %s\nArchitecture: amd64\nMaintainer: azure\nDescription: A small, lightweight cli bak-ing tool\n" "${{ github.ref_name }}" > control
-          tar cf control.tar.gz control debian-binary
-          gzip control.tar.gz
-          tar cf data.tar.gz -C deb-root .
-          dpkg-deb --build . bakme_${{ github.ref_name }}_amd64.deb
+          VERSION="${VERSION#release/}"
+
+          mkdir -p deb-root/DEBIAN
+          mkdir -p deb-root/usr/bin
+          mkdir -p deb-root/usr/share/doc/bakme
+
+          install -m 755 bakme deb-root/usr/bin/bakme
+          install -m 644 bakme.checksum deb-root/usr/share/doc/bakme/checksum
+
+          cat > deb-root/DEBIAN/control <<EOF
+          Package: bakme
+          Version: ${VERSION}
+          Architecture: amd64
+          Maintainer: Artem O.
+          Section: utils
+          Priority: optional
+          Description: A small, lightweight CLI backup tool
+          EOF
+
+          dpkg-deb --root-owner-group --build deb-root "bakme_${VERSION}_amd64.deb"
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
