@@ -19,6 +19,9 @@ jobs:
         with:
           targets: aarch64-apple-darwin
 
+      - name: Set version
+        run: echo "VERSION=${GITHUB_REF_NAME#release/}" >> "$GITHUB_ENV"
+
       - name: Build release
         run: cargo build --release --target aarch64-apple-darwin
 
@@ -36,11 +39,11 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          name: ${{ github.ref_name }}
+          name: ${{ env.VERSION }}
           tag_name: ${{ github.ref_name }}
           draft: false
           prerelease: false
-          files: bakme-aarch64-apple-darwin.zip
+          files: bakme_${{ env.VERSION }}-aarch64-apple-darwin.zip
           body: "To be provided..."
 
   build-linux:
@@ -50,7 +53,9 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: x86_64-unknown-linux-musl
-
+      - name: Set version
+        run: echo "VERSION=${GITHUB_REF_NAME#release/}" >> "$GITHUB_ENV"
+    
       - name: Install musl tools
         run: sudo apt-get install -y musl-tools
 
@@ -67,11 +72,7 @@ jobs:
         run: zip bakme-linux-x86_64-musl.zip bakme bakme.checksum
 
       - name: Create .deb package
-        env:
-          VERSION: ${{ github.ref_name }}
         run: |
-          VERSION="${VERSION#release/}"
-
           mkdir -p deb-root/DEBIAN
           mkdir -p deb-root/usr/bin
           mkdir -p deb-root/usr/share/doc/bakme
@@ -94,11 +95,11 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          name: ${{ github.ref_name }}
+          name: ${{ env.VERSION }}
           tag_name: ${{ github.ref_name }}
           draft: false
           prerelease: false
           files: |
             bakme-linux-x86_64-musl.zip
-            bakme_${{ github.ref_name }}_amd64.deb
+            bakme_${{ env.VERSION }}_amd64.deb
           body: "To be provided..."
