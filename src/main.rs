@@ -30,28 +30,39 @@ struct Args {
 }
 
 static VERBOSE: AtomicBool = AtomicBool::new(false);
+fn verbose_print(msg: String) {
+    if VERBOSE.load(Ordering::Relaxed) {
+        println!("{msg}")
+    }
+}
+
 fn main() {
     let argv = Args::parse();
-    VERBOSE.store(argv.verbose, Ordering::Relaxed);
-
     let base_ext = argv.extension.unwrap_or("bak".to_string());
-
-    verbose_print(format!("Backing up {} file(s)...", argv.files.len()));
-
-    argv.files
-        .iter()
-        .for_each(|path| create_copy(path, &base_ext, argv.timed, argv.force));
+    
+    VERBOSE.store(argv.verbose, Ordering::Relaxed);    
+    verbose_print(format!("Backing up {} objects(s)...", argv.files.len()));
+    
+    argv.files.iter().for_each(|path| {
+        create_copy(
+            path.trim_end_matches(['/', '\\']),
+            &base_ext,
+            argv.timed,
+            argv.force,
+        )
+    });
 }
 
 static BAK_LIMITS: u32 = 15;
-fn create_copy(path: &String, base_ext: &str, timed: bool, force: bool) {
+fn create_copy(path: &str, base_ext: &str, timed: bool, force: bool) {
     if !std::path::Path::new(path).try_exists().unwrap_or(false) {
-        println!("Path found or invalid '{path}'");
+        println!("Path not found or invalid '{path}'");
         return;
     }
 
-    let mut counter: u32 = 0;
+    verbose_print(format!("Targed path found '{path}'"));
 
+    let mut counter: u32 = 0;
     let mut extenstion: String;
 
     let canonical_ext: String = if timed {
@@ -84,23 +95,38 @@ fn create_copy(path: &String, base_ext: &str, timed: bool, force: bool) {
         }
     }
 
-    println!("Backing up to '{new_path}'...");
-
     if std::path::Path::new(path).is_file() {
+        println!("Backing file '{path}' to '{new_path}'");
+
         if fs::copy(path, new_path).is_err() {
             println!("Error backing-up tile '{path}'");
         }
     } else {
+        println!("Backing a folder {path} to '{new_path}'");
         copy_dir(path, new_path);
     }
 }
 
-fn copy_dir(_path: &String, _new_path: String) {
-    println!("Sorry, folder are not yet supported...")
-}
+fn copy_dir(path: &str, new_path: String) {
+    if fs::create_dir(&new_path).is_err() {
+        println!("Error creating directory '{}'", new_path);
+        return;
+    }
 
-fn verbose_print(msg: String) {
-    if VERBOSE.load(Ordering::Relaxed) {
-        println!("{msg}")
+    if let Ok(entries) = fs::read_dir(path) {
+        for entry in entries.flatten() {
+            let entry_path = entry.path();
+
+            verbose_print(format!("Processing {}", entry_path.to_string_lossy()));
+
+            let entry_name = entry_path.file_name().unwrap_or_default().to_string_lossy();
+            let new_path = format!("{new_path}/{entry_name}");
+
+            if entry_path.is_dir() {
+                copy_dir(&entry_path.to_string_lossy(), new_path);
+            } else if entry_path.is_file() {
+                fs::copy(&entry_path, &new_path).ok();
+            }
+        }
     }
 }
