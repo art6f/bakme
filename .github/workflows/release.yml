@@ -43,7 +43,7 @@ jobs:
           files: bakme-aarch64-apple-darwin.zip
           body: "To be provided..."
 
-  build-linux-musl:
+  build-linux-debian:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -51,22 +51,38 @@ jobs:
         with:
           targets: x86_64-unknown-linux-musl
 
-      - name: Install musl tools
-        run: sudo apt-get install -y musl-tools
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y musl-tools fpm
 
       - name: Build release
         run: cargo build --release --target x86_64-unknown-linux-musl
 
-      - name: Copy binary checksum
-        run: cp target/x86_64-unknown-linux-musl/release/bakme bakme
-
-      - name: Generate checksum
+      - name: Copy binary and generate checksum
         run: |
+          cp target/x86_64-unknown-linux-musl/release/bakme bakme
           shasum -a 256 -b bakme > bakme.checksum
           cat bakme.checksum
 
-      - name: Pack archive
+      - name: Pack zip archive
         run: zip bakme-linux-x86_64-musl.zip bakme bakme.checksum
+
+      - name: Create .deb package
+        run: |
+          fpm \
+            --input-type tar \
+            --output-type deb \
+            --name bakme \
+            --version ${{ github.ref_name }} \
+            --architecture amd64 \
+            --license GPL 3 \
+            --description "A small, lightweight cli bak-ing tool" \
+            --url "https://github.com/art6f/bakme" \
+            --maintainer "Artem O." \
+            -p bakme_${{ github.ref_name }}_amd64.deb \
+            bakme=/usr/local/bin/bakme \
+            bakme.checksum=/usr/local/share/doc/bakme/checksum
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
@@ -75,5 +91,7 @@ jobs:
           tag_name: ${{ github.ref_name }}
           draft: false
           prerelease: false
-          files: bakme-linux-x86_64-musl.zip
+          files: |
+            bakme-linux-x86_64-musl.zip
+            bakme_${{ github.ref_name }}_amd64.deb
           body: "To be provided..."
