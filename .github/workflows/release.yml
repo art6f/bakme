@@ -34,7 +34,7 @@ jobs:
           cat bakme.checksum
 
       - name: Pack archive
-        run: zip bakme-aarch64-apple-darwin.zip bakme bakme.checksum
+        run: zip bakme_${{ env.VERSION }}-aarch64-apple-darwin.zip bakme bakme.checksum
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
