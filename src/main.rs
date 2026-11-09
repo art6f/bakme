@@ -1,5 +1,5 @@
 use bakme::{VERBOSE, create_copy, verbose_print};
-use clap::Parser;
+use clap::{CommandFactory, Parser};
 use std::sync::atomic::Ordering;
 
 /// Quick and easy bak-ing up the files by copying them
@@ -22,12 +22,18 @@ struct Args {
     #[arg(long)]
     verbose: bool,
 
+    /// a list of files or folder to backup
     files: Vec<String>,
 }
 
 fn main() {
     let argv = Args::parse();
     let base_ext = argv.extension.unwrap_or("bak".to_string());
+
+    if argv.files.is_empty() {
+        Args::command().print_help().unwrap_or_default();
+        return;
+    }
 
     VERBOSE.store(argv.verbose, Ordering::Relaxed);
     verbose_print(format!("Backing up {} objects(s)...", argv.files.len()));
