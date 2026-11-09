@@ -1,0 +1,74 @@
+name: Release Linux ARM64
+
+on:
+  push:
+    tags: ["release/**"]
+
+permissions:
+  contents: write
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build-linux-arm64:
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-unknown-linux-musl
+
+      - name: Add a targed
+        run: rustup target add aarch64-unknown-linux-musl
+
+      - name: Set version
+        run: echo "VERSION=${GITHUB_REF_NAME#release/}" >> "$GITHUB_ENV"
+    
+      - name: Install musl tools
+        run: sudo apt-get install -y musl-tools
+
+      - name: Build release
+        run: cargo build --release --target aarch64-unknown-linux-musl
+
+      - name: Copy binary and generate checksum
+        run: |
+          cp target/aarch64-unknown-linux-musl/release/bakme bakme
+          shasum -a 256 -b bakme > bakme.checksum
+          cat bakme.checksum
+
+      - name: Pack zip archive
+        run: zip "bakme_${{ env.VERSION }}-linux-arm64-musl.zip" bakme bakme.checksum
+
+      - name: Create .deb package
+        run: |
+          mkdir -p deb-root/DEBIAN
+          mkdir -p deb-root/usr/bin
+          mkdir -p deb-root/usr/share/doc/bakme
+
+          install -m 755 bakme deb-root/usr/bin/bakme
+          install -m 644 bakme.checksum deb-root/usr/share/doc/bakme/checksum
+
+          cat > deb-root/DEBIAN/control <<CONTROL
+          Package: bakme
+          Version: ${VERSION}
+          Architecture: arm64
+          Maintainer: Artem O.
+          Section: utils
+          Priority: optional
+          Description: A small, lightweight CLI backup tool
+          CONTROL
+
+          dpkg-deb --root-owner-group --build deb-root "bakme_${VERSION}_arm64.deb"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ env.VERSION }}
+          tag_name: ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          files: |
+            bakme-linux-arm64-musl.zip
+            bakme_${{ env.VERSION }}_arm64.deb
+          body: "To be provided..."

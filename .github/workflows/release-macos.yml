@@ -1,0 +1,47 @@
+name: Release macOS
+
+on:
+  push:
+    tags: ["release/**"]
+
+permissions:
+  contents: write
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build-macos-arm:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-darwin
+
+      - name: Set version
+        run: echo "VERSION=${GITHUB_REF_NAME#release/}" >> "$GITHUB_ENV"
+
+      - name: Build release
+        run: cargo build --release --target aarch64-apple-darwin
+
+      - name: Copy binary and generate checksum
+        run: cp target/aarch64-apple-darwin/release/bakme bakme
+
+      - name: Generate checksum
+        run: |
+          shasum -a 256 -b bakme > bakme.checksum
+          cat bakme.checksum
+
+      - name: Pack zip archive
+        run: zip "bakme_${{ env.VERSION }}-aarch64-apple-darwin.zip" bakme bakme.checksum
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ env.VERSION }}
+          tag_name: ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          files: bakme_${{ env.VERSION }}-aarch64-apple-darwin.zip
+          body: "To be provided..."
