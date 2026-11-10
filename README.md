@@ -10,8 +10,7 @@ A small, lightweight cli 'bak'-ing tool
 
 But it also does in a smart way – you can easily create 15 `.bak` files up to `.bak-15` or even more (you shall not, but who can stop anyway).
 
-## Features that won't surprise you
-
+## Let's have an argument
 | Flag | What it does |
 |------|-------------|
 | `-e`, `--extension` | Custom suffix instead of `.bak` |
@@ -19,7 +18,7 @@ But it also does in a smart way – you can easily create 15 `.bak` files up to
 | `-f`, `--force` | Ignores the copy safety cap and creates as many as you want |
 | `--verbose` | Extra output for fun or science |
 
-### It's kinda safe
+### It's safe for your older backups
 By default program won't make more than 15 copiesof the same file unless you tell it to.
 
 Collisions get number-suffixed automatically (`file.bak-1`, `file.bak-2`, etc.).

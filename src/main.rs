@@ -2,9 +2,9 @@ use bakme::{VERBOSE, create_copy, verbose_print};
 use clap::{CommandFactory, Parser};
 use std::sync::atomic::Ordering;
 
-/// Quick and easy bak-ing up the files by copying them
+/// Quick and easy bak-ing up the files by copying them. Use at your own risk.
 #[derive(Parser, Debug)]
-#[command(version, about, long_about = None)]
+#[command(version, about)]
 struct Args {
     /// Extension to append to the file (default: bak)
     #[arg(short, long)]
